@@ -8,8 +8,13 @@ public class ExerciseMain {
 
         VRP vrp = new VRP(100, 1500, 1200);
         vrp.generateNetworkRandomly();
+        
+        for (int i = 0; i < 100; i++) {
 		
+		System.out.println(vrp.allNodes.get(i).x + "  " + vrp.allNodes.get(i).y);
 		
+        }
+        
 	}
 
 }
