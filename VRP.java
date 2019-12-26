@@ -9,6 +9,23 @@ public class VRP {
 	
 	ArrayList<Node> customers;
 	
+    int numberOfCustomers;
+    int capacity1;
+    int capacity2;
+	
+    Random ran;
+	
+	public VRP(int totalCustomers, int cap1, int cap2) {
+        numberOfCustomers = totalCustomers;
+        capacity1 = cap1;
+        capacity2 = cap2;
+        ran = new Random(1);
+    }
+
+    void generateNetworkRandomly() {
+        createAllNodesAndCustomerLists(numberOfCustomers);
+       // CalculateDistanceMatrix();
+    }
 	
 	public void createAllNodesAndCustomerLists( int numberOfCustomers)  {
 		//Create the list with the customers
