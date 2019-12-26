@@ -6,13 +6,14 @@ public class Node {
 	int x;
 	int y;
 	int ID;
+	double serviceTime;
     boolean isRouted;
     double demand;
-    int serviceTime;
+    
 	
 	
 	public Node() {
-		// TODO Auto-generated constructor stub
+		
 	}
 
 }
