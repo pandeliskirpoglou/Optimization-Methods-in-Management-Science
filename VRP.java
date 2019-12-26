@@ -4,10 +4,14 @@ import java.util.ArrayList;
 import java.util.Random;
 
 
+
+
 public class VRP {
 
 	
 	ArrayList<Node> customers;
+	ArrayList<Node> allNodes;
+	Node depot;
 	
     int numberOfCustomers;
     int capacity1;
@@ -39,6 +43,23 @@ public class VRP {
 			cust.demand = 100*(1+ran.nextInt(5));
 			cust.serviceTime = 0.25;
 			customers.add(cust);
+		}
+		
+		allNodes = new ArrayList();
+
+		depot = new Node();
+		depot.x = 50;
+		depot.y = 50;
+		depot.demand = 0;
+		allNodes.add(depot);
+		for (int i = 0; i < customers.size(); i++) {
+			Node cust = customers.get(i);
+			allNodes.add(cust);
+		}
+
+		for (int i = 0; i < allNodes.size(); i++) {
+			Node nd = allNodes.get(i);
+			nd.ID = i;
 		}
 		
 		
