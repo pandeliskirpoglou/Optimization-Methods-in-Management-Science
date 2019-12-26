@@ -9,8 +9,7 @@ public class Node {
 	double serviceTime;
     boolean isRouted;
     double demand;
-    
-	
+ 
 	
 	public Node() {
 		
