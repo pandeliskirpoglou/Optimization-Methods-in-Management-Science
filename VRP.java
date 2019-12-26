@@ -6,12 +6,16 @@ import java.util.Random;
 
 
 
+
+
 public class VRP {
 
 	
 	ArrayList<Node> customers;
 	ArrayList<Node> allNodes;
 	Node depot;
+	double[][] distanceMatrix;
+	double[][] timeMatrix;
 	
     int numberOfCustomers;
     int capacity1;
@@ -65,6 +69,39 @@ public class VRP {
 		
 	}
 	
+	
+	public void calculateDistanceMatrix() {
+
+		distanceMatrix = new double[allNodes.size()][allNodes.size()];
+		for (int i = 0; i < allNodes.size(); i++) {
+			Node from = allNodes.get(i);
+
+			for (int j = 0; j < allNodes.size(); j++) {
+				Node to = allNodes.get(j);
+
+				double Delta_x = (from.x - to.x);
+				double Delta_y = (from.y - to.y);
+				double distance = Math.sqrt((Delta_x * Delta_x) + (Delta_y * Delta_y));
+
+				distance = Math.round(distance);
+
+				distanceMatrix[i][j] = distance;
+			}
+		}
+		
+		for (int i = 0; i < allNodes.size(); i++) {
+
+			for (int j = 0; j < allNodes.size(); j++) {
+				Node node = allNodes.get(j);
+				timeMatrix[i][j] = distanceMatrix[i][j]/35 + 0.25; 
+				
+
+				
+			}
+			
+		}
+		
+	}
 	
 	
 	
