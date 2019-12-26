@@ -3,7 +3,6 @@ package project_mebede;
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.w3c.dom.Node;
 
 public class VRP {
 
