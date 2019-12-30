@@ -1,18 +1,19 @@
-package project_mebede;
+package mebede;
 
+/**
+*
+* @author mzaxa
+*/
 public class Node {
-	
-	
-	int x;
-	int y;
-	int ID;
-	double serviceTime;
-    boolean isRouted;
-    double demand;
- 
-	
-	public Node() {
-		
-	}
-
+   
+       int x;
+       int y;
+       int ID;
+       boolean isRouted;
+       double demand;
+       double service_time;
+       
+       public Node() 
+       {
+       }
 }
