@@ -1,4 +1,4 @@
-package mebede;
+package MEBEDE;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -79,7 +79,7 @@ public class SolutionDrawer {
         }
         
         for (int r = 0; r < s.routes.size(); r++) {
-            Route rt = s.routes.get(r);
+            Route rt = s.allRoutes.get(r);
             for (int i = 1; i < rt.nodes.size(); i++) {
                 Node n;
                 n = rt.nodes.get(i - 1);

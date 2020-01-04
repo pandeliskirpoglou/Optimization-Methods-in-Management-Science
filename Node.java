@@ -1,4 +1,4 @@
-package mebede;
+package MEBEDE;
 
 /**
 *
@@ -13,7 +13,8 @@ public class Node {
        double demand;
        double service_time;
        
-       public Node() 
-       {
+       public Node() {
+       
        }
+       
 }

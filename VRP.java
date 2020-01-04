@@ -1,4 +1,4 @@
-package mebede;
+package MEBEDE;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -14,12 +14,14 @@ public class VRP {
     Random ran;
     Node depot;
     int numberOfCustomers;
-    int capacity;
+    int capacity1;
+    int capacity2;
     Solution bestSolutionThroughTabuSearch;
 
-    public VRP(int totalCustomers, int cap) {
+    public VRP(int totalCustomers, int cap1, int cap2) {
         numberOfCustomers = totalCustomers;
-        capacity = cap;
+        capacity1 = cap1;
+        capacity2 = cap2;
         ran = new Random(1);
     }
 
@@ -31,7 +33,7 @@ public class VRP {
     public void CreateAllNodesAndCustomerLists(int numberOfCustomers) {
         //Create the list with the customers
         customers = new ArrayList();
-        int birthday = 9021998; // if your bday is on 9 feb 1998
+        int birthday = 18031999; 
         Random ran = new Random(birthday);
         for (int i = 0; i < numberOfCustomers; i++) {
             Node cust = new Node();
@@ -39,7 +41,7 @@ public class VRP {
             cust.x = ran.nextInt(100);
             cust.y = ran.nextInt(100);
             cust.demand = 100*(1 + ran.nextInt(5));
-            cust.service_time = 0.25;
+            cust.serviceTime = 0.25;
 
             customers.add(cust);
         }
@@ -88,7 +90,8 @@ public class VRP {
         Solution s = new Solution();
 
         ApplyNearestNeighborMethod(s);
-        TabuSearch(s);
+        printSolution(s);
+       // TabuSearch(s);
     }
 
     private void SetRoutedFlagToFalseForAllCustomers() {
@@ -100,32 +103,62 @@ public class VRP {
     private void ApplyNearestNeighborMethod(Solution solution) {
 
         boolean modelIsFeasible = true;
-        ArrayList<Route> routeList = solution.routes;
+        ArrayList<Route> routeList1 = solution.routes1500;
+        ArrayList<Route> routeList2 = solution.routes1200;
 
         SetRoutedFlagToFalseForAllCustomers();
 
         //Q - How many insertions? A - Equal to the number of customers! Thus for i = 0 -> customers.size() 
-        for (int insertions = 0; insertions < customers.size(); /* the insertions will be updated in the for loop */) {
-            //A. Insertion Identification
-            CustomerInsertion bestInsertion = new CustomerInsertion();
-            bestInsertion.cost = Double.MAX_VALUE;
-            Route lastRoute = GetLastRoute(routeList);
-            if (lastRoute != null) {
-                IdentifyBestInsertion_NN(bestInsertion, lastRoute);
-            }
-            //B. Insertion Application
-            //Feasible insertion was identified
-            if (bestInsertion.cost < Double.MAX_VALUE) {
-                ApplyCustomerInsertion(bestInsertion, solution);
-                insertions++;
-            } //C. If no insertion was feasible
-            else {
-                //C1. There is a customer with demand larger than capacity -> Infeasibility
-                if (lastRoute != null && lastRoute.nodes.size() == 2) {
-                    modelIsFeasible = false;
-                    break;
-                } else {
-                    CreateAndPushAnEmptyRouteInTheSolution(solution);
+        for (int insertions = 0; insertions < customers.size();) /* the insertions will be updated in the for loop */ {
+            if (routeList1.size() < 15) {
+            	int num = 1;
+            	//A. Insertion Identification
+            	CustomerInsertion bestInsertion = new CustomerInsertion();
+                bestInsertion.cost = Double.MAX_VALUE;
+                Route lastRoute = GetLastRoute(routeList1);
+                if (lastRoute != null) {
+                    IdentifyBestInsertion_NN(bestInsertion, lastRoute);
+                }
+                //B. Insertion Application
+                //Feasible insertion was identified
+                if (bestInsertion.cost < Double.MAX_VALUE) {
+                    ApplyCustomerInsertion(bestInsertion, solution);
+                    insertions++;
+                } //C. If no insertion was feasible
+                else {
+                    //C1. There is a customer with demand larger than capacity -> Infeasibility
+                    if (lastRoute != null && lastRoute.nodes.size() == 1) {
+                        modelIsFeasible = false;
+                        break;
+                    } else {
+                        CreateAndPushAnEmptyRouteInTheSolution(solution, capacity1, num);
+              
+                    }
+                }
+            } else if (routeList2.size() < 15) { 
+            	int num = 2;
+            	//A. Insertion Identification
+            	CustomerInsertion bestInsertion = new CustomerInsertion();
+                bestInsertion.cost = Double.MAX_VALUE;
+                Route lastRoute = GetLastRoute(routeList2);
+                if (lastRoute != null) {
+                    IdentifyBestInsertion_NN(bestInsertion, lastRoute);
+                }
+                //B. Insertion Application
+                //Feasible insertion was identified
+                if (bestInsertion.cost < Double.MAX_VALUE) {
+                    ApplyCustomerInsertion(bestInsertion, solution);
+                    insertions++;
+                } //C. If no insertion was feasible
+                else {
+                    //C1. There is a customer with demand larger than capacity -> Infeasibility
+                    if (lastRoute != null && lastRoute.nodes.size() == 2) {
+                        modelIsFeasible = false;
+                        break;
+                    } else {
+                        CreateAndPushAnEmptyRouteInTheSolution(solution, capacity2, num);
+               
+                    }
                 }
             }
         }
@@ -133,6 +166,19 @@ public class VRP {
         if (modelIsFeasible == false) {
             //TODO
         }
+    }
+    
+    private void printSolution(Solution solution) {
+    	ArrayList<Route> routes = solution.allRoutes;
+    	int i = 0;
+    	for (Route route:routes) {
+    		i++;
+    		ArrayList<Node> nodes = route.nodes;
+    		System.out.println("In the route " + i + " the sequence of nodes is:");
+    		for (Node node:nodes) {
+    			System.out.println(node.ID + ",");
+    		}
+    	}
     }
 
     private Route GetLastRoute(ArrayList<Route> routeList) {
@@ -143,28 +189,31 @@ public class VRP {
         }
     }
 
-    private void CreateAndPushAnEmptyRouteInTheSolution(Solution currentSolution) {
+    private void CreateAndPushAnEmptyRouteInTheSolution(Solution currentSolution, int capacity, int routenumb ) {
         Route rt = new Route(capacity);
         rt.nodes.add(depot);
-        rt.nodes.add(depot);
-        currentSolution.routes.add(rt);
+        if (routenumb == 1) {
+        	currentSolution.routes1500.add(rt);
+        } else {
+        	currentSolution.routes1200.add(rt);
+        }
+        currentSolution.allRoutes.add(rt);
     }
 
     private void ApplyCustomerInsertion(CustomerInsertion insertion, Solution solution) {
         Node insertedCustomer = insertion.customer;
         Route route = insertion.insertionRoute;
 
-        route.nodes.add(route.nodes.size() - 1, insertedCustomer);
+        route.nodes.add(insertedCustomer); //add(route.nodes.size() - 1, insertedCustomer);
 
-        Node beforeInserted = route.nodes.get(route.nodes.size() - 3);
+        Node beforeInserted = route.nodes.get(route.nodes.size() - 2);
 
-        double costAdded = distanceMatrix[beforeInserted.ID][insertedCustomer.ID] + distanceMatrix[insertedCustomer.ID][depot.ID]; // remove the second distanceMatrix
-        double costRemoved = distanceMatrix[beforeInserted.ID][depot.ID]; // delete it
+        double costAdded = distanceMatrix[beforeInserted.ID][insertedCustomer.ID];
 
-        route.cost = route.cost + (costAdded - costRemoved); // route.cost + costAdded)
+        route.cost = route.cost + costAdded;
         route.load = route.load + insertedCustomer.demand;
-        route.duration = costAdded / 35 + 0.25; // 0.25 is the service time 
-        solution.cost = solution.cost + (costAdded - costRemoved); // solution.cost + costAdded
+        route.duration = costAdded / 35 + insertedCustomer.serviceTime;
+        solution.cost = solution.cost + costAdded;
 
         insertedCustomer.isRouted = true;
     }
@@ -177,23 +226,24 @@ public class VRP {
             if (candidate.isRouted == false) {
                 if (lastRoute.load + candidate.demand <= lastRoute.capacity) {
                     ArrayList<Node> nodeSequence = lastRoute.nodes;
-                    Node lastCustomerInTheRoute = nodeSequence.get(nodeSequence.size() - 2);
+                    Node lastCustomerInTheRoute = nodeSequence.get(nodeSequence.size() - 1);
 
                     double trialCost = distanceMatrix[lastCustomerInTheRoute.ID][candidate.ID];
-                //  double trialDuration = trialCost/35 + 0.25;
+                    double trialDuration = trialCost/35 + candidate.serviceTime;
                    
-                  //if (lastRoute.duration + trialCost <= 3,5 {  
-                    if (trialCost < bestInsertion.cost) {
-                        bestInsertion.customer = candidate;
-                        bestInsertion.insertionRoute = lastRoute;
-                        bestInsertion.cost = trialCost;
+                    if (lastRoute.duration + trialDuration <= 3.5) {  
+                    	if (trialCost < bestInsertion.cost) {
+                    		bestInsertion.customer = candidate;
+                    		bestInsertion.insertionRoute = lastRoute;
+                    		bestInsertion.cost = trialCost;
+                    	}
                     }
-                  //}
                 }
             }
         }
     }
-
+   
+/*
     private void TabuSearch(Solution sol) {
         bestSolutionThroughTabuSearch = cloneSolution(sol);
 
@@ -814,4 +864,5 @@ public class VRP {
         }
         return totCost;
     }
+    **/
 }
