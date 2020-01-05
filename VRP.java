@@ -257,10 +257,10 @@ public class VRP {
         int i = 0; //insertions
         while (i < customers.size()) {
         	if (routeList1500.size() < 15) {
-        		Route routeForSolution = findBestInsertionFor1500();
+        		Route routeForSolution = findBestInsertion(1500);
         		
         	} else {
-        		findBestInsertionFor1200();
+        		Route routeForSolution = findBestInsertion(1200);
         		
         	}
         	
@@ -270,12 +270,14 @@ public class VRP {
     }
     
     
-    public Route findBestInsertionFor1500() {
-    	double arraysum, absolute, testTime;
-    	double bestArraysum, bestAbsolute, cost;
+    public Route findBestInsertion(int cap) {
+    	double arraysum, absolute, testTime, duration;
+    	double bestArraysum, bestAbsolute, cost, bestDuration;
     	int j;
     	Route route = new Route(1500);
     	bestAbsolute = Double.MAX_VALUE;
+    	bestArraysum = Double.MAX_VALUE;
+    	bestDuration = Double.MAX_VALUE;
     	ArrayList<Node> bestNodeSequence = new ArrayList<Node>();
     	
     	for (int i = 1; i < allNodes.size(); i++) {
@@ -284,81 +286,47 @@ public class VRP {
     		j = 1;
     		
     		Node test = allNodes.get(i);
-    		
+    		duration = 0;
     		cost = 0;
     		arraysum = 0;
     		testTime = 0;
     		if (!test.isRouted) {
     			
-    			while (j!=i && j < allNodes.size() && arraysum <= 1500 && testTime <= 3.5) {
-    				
-	    			arraysum += distanceMatrix[i][j];
-	    			testTime += distanceMatrix[i][j]/35 + 0.25;
-	    				
-	    			if (arraysum <= 1500 && testTime <= 3.5) {
-	    				nodeSequence.add(allNodes.get(j));
-	    				cost = arraysum; 
-	    			}
+    			while (j!=i && j < allNodes.size() && arraysum <= cap && testTime <= 3.5) {
+    				if (allNodes.get(j).isRouted) {
+    					arraysum += distanceMatrix[i][j];
+		    			testTime += distanceMatrix[i][j]/35 + 0.25;
+		    				
+		    			if (arraysum <= cap && testTime <= 3.5) {
+		    				nodeSequence.add(allNodes.get(j));
+		    				cost = arraysum;
+		    				duration = testTime;
+		    			}
+    				}
     				j++;
     			}
-    			absolute = 1500 - cost;
+    			absolute = cap - cost;
     			if (absolute < bestAbsolute) {
     				bestAbsolute = absolute;
     				bestNodeSequence = nodeSequence; //node sequence
     				bestArraysum = cost; // cost of sequence
+    				bestDuration = duration;
     			}
     		}
     		
+    		
+    		
     	}
+    	route.nodes = bestNodeSequence;
+    	route.cost = bestArraysum;
+    	route.duration = bestDuration;
     	
     	return route;
     
     
     }
     
-    public void findBestInsertionFor1200() {
-    	double arraysum, absolute, testTime;
-    	double bestArraysum, bestAbsolute, cost;
-    	int j;
- 
-    	bestAbsolute = Double.MAX_VALUE;
-    	ArrayList<Node> bestNodeSequence = new ArrayList<Node>();
-    	
-    	for (int i = 1; i < allNodes.size(); i++) {
-    		ArrayList<Node> nodeSequence = new ArrayList<Node>();
-    		nodeSequence.add(allNodes.get(0));
-    		j = 1;
-    		
-    		Node test = allNodes.get(i);
-    		
-    		cost = 0;
-    		arraysum = 0;
-    		testTime = 0;
-    		if (!test.isRouted) {
-    			
-    			while (j!=i && j < allNodes.size() && arraysum <= 1200 && testTime <= 3.5) {
-    				
-	    			arraysum += distanceMatrix[i][j];
-	    			testTime += distanceMatrix[i][j]/35 + 0.25;
-	    				
-	    			if (arraysum <= 1200 && testTime <= 3.5) {
-	    				nodeSequence.add(allNodes.get(j));
-	    				cost = arraysum; 
-	    			}
-    				j++;
-    			}
-    			absolute = 1200 - cost;
-    			if (absolute < bestAbsolute) {
-    				bestAbsolute = absolute;
-    				bestNodeSequence = nodeSequence; //node sequence
-    				bestArraysum = cost; // cost of sequence
-    			}
-    		}
-    		
-    	}
-        
-        
-    }
+
 /*
  * 
  	 
