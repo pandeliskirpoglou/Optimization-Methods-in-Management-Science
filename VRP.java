@@ -91,6 +91,7 @@ public class VRP {
 
         ApplyNearestNeighborMethod(s);
         printSolution(s);
+        System.out.println("The cost is:" + s.cost );
        // TabuSearch(s);
     }
 
@@ -242,8 +243,126 @@ public class VRP {
             }
         }
     }
+    
+    
+    
+    
    
+    public void VND() {
+    	
+    	Solution solution = new Solution();
+    	ArrayList<Route> routeList1500 = solution.routes1500;
+        ArrayList<Route> routeList1200 = solution.routes1200;
+        
+        int i = 0; //insertions
+        while (i < customers.size()) {
+        	if (routeList1500.size() < 15) {
+        		Route routeForSolution = findBestInsertionFor1500();
+        		
+        	} else {
+        		findBestInsertionFor1200();
+        		
+        	}
+        	
+        	
+        	i++;
+        }
+    }
+    
+    
+    public Route findBestInsertionFor1500() {
+    	double arraysum, absolute, testTime;
+    	double bestArraysum, bestAbsolute, cost;
+    	int j;
+    	Route route = new Route(1500);
+    	bestAbsolute = Double.MAX_VALUE;
+    	ArrayList<Node> bestNodeSequence = new ArrayList<Node>();
+    	
+    	for (int i = 1; i < allNodes.size(); i++) {
+    		ArrayList<Node> nodeSequence = new ArrayList<Node>();
+    		nodeSequence.add(allNodes.get(0));
+    		j = 1;
+    		
+    		Node test = allNodes.get(i);
+    		
+    		cost = 0;
+    		arraysum = 0;
+    		testTime = 0;
+    		if (!test.isRouted) {
+    			
+    			while (j!=i && j < allNodes.size() && arraysum <= 1500 && testTime <= 3.5) {
+    				
+	    			arraysum += distanceMatrix[i][j];
+	    			testTime += distanceMatrix[i][j]/35 + 0.25;
+	    				
+	    			if (arraysum <= 1500 && testTime <= 3.5) {
+	    				nodeSequence.add(allNodes.get(j));
+	    				cost = arraysum; 
+	    			}
+    				j++;
+    			}
+    			absolute = 1500 - cost;
+    			if (absolute < bestAbsolute) {
+    				bestAbsolute = absolute;
+    				bestNodeSequence = nodeSequence; //node sequence
+    				bestArraysum = cost; // cost of sequence
+    			}
+    		}
+    		
+    	}
+    	
+    	return route;
+    
+    
+    }
+    
+    public void findBestInsertionFor1200() {
+    	double arraysum, absolute, testTime;
+    	double bestArraysum, bestAbsolute, cost;
+    	int j;
+ 
+    	bestAbsolute = Double.MAX_VALUE;
+    	ArrayList<Node> bestNodeSequence = new ArrayList<Node>();
+    	
+    	for (int i = 1; i < allNodes.size(); i++) {
+    		ArrayList<Node> nodeSequence = new ArrayList<Node>();
+    		nodeSequence.add(allNodes.get(0));
+    		j = 1;
+    		
+    		Node test = allNodes.get(i);
+    		
+    		cost = 0;
+    		arraysum = 0;
+    		testTime = 0;
+    		if (!test.isRouted) {
+    			
+    			while (j!=i && j < allNodes.size() && arraysum <= 1200 && testTime <= 3.5) {
+    				
+	    			arraysum += distanceMatrix[i][j];
+	    			testTime += distanceMatrix[i][j]/35 + 0.25;
+	    				
+	    			if (arraysum <= 1200 && testTime <= 3.5) {
+	    				nodeSequence.add(allNodes.get(j));
+	    				cost = arraysum; 
+	    			}
+    				j++;
+    			}
+    			absolute = 1200 - cost;
+    			if (absolute < bestAbsolute) {
+    				bestAbsolute = absolute;
+    				bestNodeSequence = nodeSequence; //node sequence
+    				bestArraysum = cost; // cost of sequence
+    			}
+    		}
+    		
+    	}
+        
+        
+    }
 /*
+ * 
+ 	 
+
     private void TabuSearch(Solution sol) {
         bestSolutionThroughTabuSearch = cloneSolution(sol);
 
