@@ -11,7 +11,7 @@ public class Node {
        int ID;
        boolean isRouted;
        double demand;
-       double service_time;
+       double serviceTime;
        
        public Node() {
        
