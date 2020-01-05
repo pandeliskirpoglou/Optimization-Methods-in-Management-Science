@@ -78,7 +78,7 @@ public class SolutionDrawer {
             }
         }
         
-        for (int r = 0; r < s.routes.size(); r++) {
+        for (int r = 0; r < s.allRoutes.size(); r++) {
             Route rt = s.allRoutes.get(r);
             for (int i = 1; i < rt.nodes.size(); i++) {
                 Node n;
