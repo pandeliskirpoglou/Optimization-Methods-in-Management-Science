@@ -377,11 +377,8 @@ public class VRP {
 	}
 
 	private void InitializeMoves(RelocationMove rm, SwapMove sm, TwoOptMove top) {
-		// Initialize the relocation move rm
 		InitializeTheRelocationMove(rm);
-		// Initialize the swap move sm
 		InitializeTheSwapMove(sm);
-		// Initialize the 2 opt move
 		InitializeTheTwoOptMove(top);
 	}
 
