@@ -32,8 +32,8 @@ public class VRP {
 
     public void CreateAllNodesAndCustomerLists(int numberOfCustomers) {
         //Create the list with the customers
-        customers = new ArrayList();
-        int birthday = 18031999; 
+        customers = new ArrayList<Node>();
+        int birthday = 18031999;
         Random ran = new Random(birthday);
         for (int i = 0; i < numberOfCustomers; i++) {
             Node cust = new Node();
@@ -47,7 +47,7 @@ public class VRP {
         }
 
         //Build the allNodes array and the corresponding distance matrix
-        allNodes = new ArrayList();
+        allNodes = new ArrayList<Node>();
 
         depot = new Node();
         depot.x = 50;
@@ -91,7 +91,7 @@ public class VRP {
 
         ApplyNearestNeighborMethod(s);
         printSolution(s);
-        System.out.println("The cost is:" + s.cost );
+        System.out.println("The total distance crossed by all the vehicles is: "+findTotalDistanceOfSolution(s)+" km");
        // TabuSearch(s);
     }
 
@@ -109,7 +109,7 @@ public class VRP {
 
         SetRoutedFlagToFalseForAllCustomers();
 
-        //Q - How many insertions? A - Equal to the number of customers! Thus for i = 0 -> customers.size() 
+        //Q - How many insertions? A - Equal to the number of customers! Thus for i = 0 -> customers.size()
         for (int insertions = 0; insertions < customers.size();) /* the insertions will be updated in the for loop */ {
             if (routeList1.size() < 15) {
             	int num = 1;
@@ -133,10 +133,10 @@ public class VRP {
                         break;
                     } else {
                         CreateAndPushAnEmptyRouteInTheSolution(solution, capacity1, num);
-              
+
                     }
                 }
-            } else if (routeList2.size() < 15) { 
+            } else if (routeList2.size() < 15) {
             	int num = 2;
             	//A. Insertion Identification
             	CustomerInsertion bestInsertion = new CustomerInsertion();
@@ -158,7 +158,7 @@ public class VRP {
                         break;
                     } else {
                         CreateAndPushAnEmptyRouteInTheSolution(solution, capacity2, num);
-               
+
                     }
                 }
             }
@@ -168,7 +168,7 @@ public class VRP {
             //TODO
         }
     }
-    
+
     private void printSolution(Solution solution) {
     	ArrayList<Route> routes = solution.allRoutes;
     	int i = 0;
@@ -214,7 +214,7 @@ public class VRP {
         route.cost = route.cost + costAdded;
         route.load = route.load + insertedCustomer.demand;
         route.duration = costAdded / 35 + insertedCustomer.serviceTime;
-        solution.cost = solution.cost + costAdded;
+        //   solution.cost = solution.cost + costAdded; It is correct but the value of the price of the objective unction should happen in a separate method
 
         insertedCustomer.isRouted = true;
     }
@@ -231,8 +231,8 @@ public class VRP {
 
                     double trialCost = distanceMatrix[lastCustomerInTheRoute.ID][candidate.ID];
                     double trialDuration = trialCost/35 + candidate.serviceTime;
-                   
-                    if (lastRoute.duration + trialDuration <= 3.5) {  
+
+                    if (lastRoute.duration + trialDuration <= 3.5) {
                     	if (trialCost < bestInsertion.cost) {
                     		bestInsertion.customer = candidate;
                     		bestInsertion.insertionRoute = lastRoute;
@@ -243,33 +243,44 @@ public class VRP {
             }
         }
     }
-    
-    
-    
-    
-   
+
+
+	//Method calculating the value of the objective function
+    public double findTotalDistanceOfSolution(Solution s) {
+
+			for (int i = 0; i < s.allRoutes.size(); i++) {
+				s.cost = s.cost + s.allRoutes.get(i).cost;
+			}
+			return s.cost;
+
+	}
+
+
+
+
+
     public void VND() {
-    	
+
     	Solution solution = new Solution();
     	ArrayList<Route> routeList1500 = solution.routes1500;
         ArrayList<Route> routeList1200 = solution.routes1200;
-        
+
         int i = 0; //insertions
         while (i < customers.size()) {
         	if (routeList1500.size() < 15) {
         		Route routeForSolution = findBestInsertion(1500);
-        		
+
         	} else {
         		Route routeForSolution = findBestInsertion(1200);
-        		
+
         	}
-        	
-        	
+
+
         	i++;
         }
     }
-    
-    
+
+
     public Route findBestInsertion(int cap) {
     	double arraysum, absolute, testTime, duration;
     	double bestArraysum, bestAbsolute, cost, bestDuration;
@@ -279,24 +290,24 @@ public class VRP {
     	bestArraysum = Double.MAX_VALUE;
     	bestDuration = Double.MAX_VALUE;
     	ArrayList<Node> bestNodeSequence = new ArrayList<Node>();
-    	
+
     	for (int i = 1; i < allNodes.size(); i++) {
     		ArrayList<Node> nodeSequence = new ArrayList<Node>();
     		nodeSequence.add(allNodes.get(0));
     		j = 1;
-    		
+
     		Node test = allNodes.get(i);
     		duration = 0;
     		cost = 0;
     		arraysum = 0;
     		testTime = 0;
     		if (!test.isRouted) {
-    			
+
     			while (j!=i && j < allNodes.size() && arraysum <= cap && testTime <= 3.5) {
     				if (allNodes.get(j).isRouted) {
     					arraysum += distanceMatrix[i][j];
 		    			testTime += distanceMatrix[i][j]/35 + 0.25;
-		    				
+
 		    			if (arraysum <= cap && testTime <= 3.5) {
 		    				nodeSequence.add(allNodes.get(j));
 		    				cost = arraysum;
@@ -313,23 +324,23 @@ public class VRP {
     				bestDuration = duration;
     			}
     		}
-    		
-    		
-    		
+
+
+
     	}
     	route.nodes = bestNodeSequence;
     	route.cost = bestArraysum;
     	route.duration = bestDuration;
-    	
+
     	return route;
-    
-    
+
+
     }
-    
+
 
 /*
- * 
- 	 
+ *
+
 
     private void TabuSearch(Solution sol) {
         bestSolutionThroughTabuSearch = cloneSolution(sol);
@@ -337,7 +348,7 @@ public class VRP {
         RelocationMove rm = new RelocationMove();
         SwapMove sm = new SwapMove();
         TwoOptMove top = new TwoOptMove();
-        
+
         for (int i = 0; i < 1000; i++) {
             InitializeOperators(rm, sm, top);
 
@@ -493,7 +504,7 @@ public class VRP {
 
                         double moveCost = Double.MAX_VALUE;
 
-                        if (rt1 == rt2) // within route 
+                        if (rt1 == rt2) // within route
                         {
                             if (firstNodeIndex == secondNodeIndex - 1) {
                                 double costRemoved = distanceMatrix[a1.ID][b1.ID] + distanceMatrix[b1.ID][b2.ID] + distanceMatrix[b2.ID][c2.ID];
@@ -688,11 +699,11 @@ public class VRP {
                  secureRouteLoad += A.demand;
             }
 
-            if (Math.abs(secureRouteCost - rt.cost) > 0.001) 
+            if (Math.abs(secureRouteCost - rt.cost) > 0.001)
             {
                 int routeCostProblem = 0;
             }
-            
+
              if (secureRouteLoad != rt.load || secureRouteLoad > rt.capacity)
             {
                 System.out.println("route Load Problem");
@@ -701,7 +712,7 @@ public class VRP {
             secureSolutionCost = secureSolutionCost + secureRouteCost;
         }
 
-        if (Math.abs(secureSolutionCost - solution.cost) > 0.001) 
+        if (Math.abs(secureSolutionCost - solution.cost) > 0.001)
         {
             int solutionCostProblem = 0;
         }
@@ -748,7 +759,7 @@ public class VRP {
                         start2 = nodeInd1 + 2;
                     }
 
-                    for (int nodeInd2 = start2; nodeInd2 < rt2.nodes.size() - 1; nodeInd2++) 
+                    for (int nodeInd2 = start2; nodeInd2 < rt2.nodes.size() - 1; nodeInd2++)
                     {
                         double moveCost = Double.MAX_VALUE;
 
@@ -790,7 +801,7 @@ public class VRP {
                             moveCost = costAdded - costRemoved;
                         }
 
-                        if (moveCost < top.moveCost) 
+                        if (moveCost < top.moveCost)
                         {
                             StoreBestTwoOptMove(rtInd1, rtInd2, nodeInd1, nodeInd2, moveCost, top);
                         }
@@ -808,30 +819,30 @@ public class VRP {
         top.moveCost = moveCost;
     }
 
-    private void ApplyTwoOptMove(TwoOptMove top, Solution sol) 
+    private void ApplyTwoOptMove(TwoOptMove top, Solution sol)
     {
         Route rt1 = sol.routes.get(top.positionOfFirstRoute);
         Route rt2 = sol.routes.get(top.positionOfSecondRoute);
 
-        if (rt1 == rt2) 
+        if (rt1 == rt2)
         {
             ArrayList modifiedRt = new ArrayList();
 
-            for (int i = 0; i <= top.positionOfFirstNode; i++) 
+            for (int i = 0; i <= top.positionOfFirstNode; i++)
             {
                 modifiedRt.add(rt1.nodes.get(i));
             }
-            for (int i = top.positionOfSecondNode; i > top.positionOfFirstNode; i--) 
+            for (int i = top.positionOfSecondNode; i > top.positionOfFirstNode; i--)
             {
                 modifiedRt.add(rt1.nodes.get(i));
             }
-            for (int i = top.positionOfSecondNode + 1; i < rt1.nodes.size(); i++) 
+            for (int i = top.positionOfSecondNode + 1; i < rt1.nodes.size(); i++)
             {
                 modifiedRt.add(rt1.nodes.get(i));
             }
 
             rt1.nodes = modifiedRt;
-            
+
             rt1.cost += top.moveCost;
             sol.cost += top.moveCost;
         }
@@ -839,13 +850,13 @@ public class VRP {
         {
             ArrayList modifiedRt1 = new ArrayList();
             ArrayList modifiedRt2 = new ArrayList();
-            
+
             Node A = (rt1.nodes.get(top.positionOfFirstNode));
             Node B = (rt1.nodes.get(top.positionOfFirstNode + 1));
             Node K = (rt2.nodes.get(top.positionOfSecondNode));
             Node L = (rt2.nodes.get(top.positionOfSecondNode + 1));
-            
-           
+
+
             for (int i = 0 ; i <= top.positionOfFirstNode; i++)
             {
                 modifiedRt1.add(rt1.nodes.get(i));
@@ -854,7 +865,7 @@ public class VRP {
             {
                 modifiedRt1.add(rt2.nodes.get(i));
             }
-             
+
             for (int i = 0 ; i <= top.positionOfSecondNode; i++)
             {
                 modifiedRt2.add(rt2.nodes.get(i));
@@ -863,35 +874,35 @@ public class VRP {
             {
                 modifiedRt2.add(rt1.nodes.get(i));
             }
-            
+
             double rt1SegmentLoad = 0;
             for (int i = 0 ; i <= top.positionOfFirstNode; i++)
             {
                 rt1SegmentLoad += rt1.nodes.get(i).demand;
             }
-            
+
             double rt2SegmentLoad = 0;
             for (int i = 0 ; i <= top.positionOfSecondNode; i++)
             {
                 rt2SegmentLoad += rt2.nodes.get(i).demand;
             }
-            
+
             double originalRt1Load = rt1.load;
             rt1.load = rt1SegmentLoad + (rt2.load - rt2SegmentLoad);
             rt2.load = rt2SegmentLoad + (originalRt1Load - rt1SegmentLoad);
-            
+
             rt1.nodes = modifiedRt1;
             rt2.nodes = modifiedRt2;
-            
+
             rt1.cost = UpdateRouteCost(rt1);
             rt2.cost = UpdateRouteCost(rt2);
-            
+
             sol.cost += top.moveCost;
         }
 
     }
 
-    private boolean CapacityConstraintsAreViolated(Route rt1, int nodeInd1, Route rt2, int nodeInd2) 
+    private boolean CapacityConstraintsAreViolated(Route rt1, int nodeInd1, Route rt2, int nodeInd2)
     {
         double rt1FirstSegmentLoad = 0;
         for (int i = 0 ; i <= nodeInd1; i++)
@@ -899,32 +910,32 @@ public class VRP {
             rt1FirstSegmentLoad += rt1.nodes.get(i).demand;
         }
         double rt1SecondSegment = rt1.load - rt1FirstSegmentLoad;
-        
+
         double rt2FirstSegmentLoad = 0;
         for (int i = 0 ; i <= nodeInd2; i++)
         {
             rt2FirstSegmentLoad += rt2.nodes.get(i).demand;
         }
         double rt2SecondSegment = rt2.load - rt2FirstSegmentLoad;
-        
+
         if (rt1FirstSegmentLoad +  rt2SecondSegment > rt1.capacity)
         {
             return true;
         }
-        
+
         if (rt2FirstSegmentLoad +  rt1SecondSegment > rt2.capacity)
         {
             return true;
         }
-        
+
         return false;
     }
 
-    private double CalculateCostSol(Solution sol) 
+    private double CalculateCostSol(Solution sol)
     {
         double totalCost = 0;
 
-        for (int i = 0; i < sol.routes.size(); i++) 
+        for (int i = 0; i < sol.routes.size(); i++)
         {
             Route rt = sol.routes.get(i);
 
@@ -940,7 +951,7 @@ public class VRP {
 
     }
 
-    private double UpdateRouteCost(Route rt) 
+    private double UpdateRouteCost(Route rt)
     {
         double totCost = 0 ;
         for (int i = 0 ; i < rt.nodes.size()-1; i++)
