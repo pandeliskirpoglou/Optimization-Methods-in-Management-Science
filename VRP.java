@@ -349,7 +349,6 @@ public class VRP {
 
 	private Solution VND(Solution s) {
 
-		// What would happen if Solution bestSolution = s;
 		Solution bestSolution = cloneSolution(s);
 
 		boolean terminationCondition = false;
@@ -530,13 +529,10 @@ public class VRP {
 
 			Node lastInTheRoute = nodeSequence.get(nodeSequence.size() - 1);
 
-			// First Step: Identify the non-routed nearest neighbor (his position in the
-			// customers list) of the last node in the nodeSequence list
+		
 			for (int j = 0; j < customers.size(); j++) {
-				// The examined node is called candidate
 				Node candidate = customers.get(j);
 
-				// if this candidate has not been pushed in the solution
 				if (candidate.isRouted == false) {
 					double trialCost = distanceMatrix[lastInTheRoute.ID][candidate.ID];
 
@@ -571,8 +567,7 @@ public class VRP {
 		s.cost = s.cost + distanceMatrix[lastInTheRoute.ID][depot.ID];
 
 		route.cost = route.cost + distanceMatrix[lastInTheRoute.ID][depot.ID];
-		// s.rt.cost = s.rt.cost + distanceMatrix[lastInTheRoute.ID][depot.ID];; // same
-		// thing
+	
 	}
 
 	private void findBestRelocationMove(RelocationMove rm, Solution s) {
@@ -614,27 +609,19 @@ public class VRP {
 	private void applyRelocationMove(RelocationMove rm, Solution s) {
 		Node relocatedNode = s.rt.nodes.get(rm.originNodePosition);
 
-		// Take out the relocated node
+	
 		s.rt.nodes.remove(rm.originNodePosition);
 
-		// Reinsert the relocated node into the appropriarte position
-		// Where??? -> after the node that WAS (!!!!) located in the
-		// rm.positionToBeInserted of the route
-
-		// Watch out!!!
-		// If the relocated customer is reinserted backwards we have to re-insert it in
-		// (rm.positionToBeInserted + 1)
+		
 		if (rm.targetNodePosition < rm.originNodePosition) {
 			s.rt.nodes.add(rm.targetNodePosition + 1, relocatedNode);
 		}
-		//// else (if it is reinserted forward) we have to re-insert it in
-		//// (rm.positionToBeInserted)
+	
 		else {
 			s.rt.nodes.add(rm.targetNodePosition, relocatedNode);
 		}
 
-		// just for debugging purposes
-		// to test if everything is OK
+	
 		double newSolutionCost = 0;
 		for (int i = 0; i < s.rt.nodes.size() - 1; i++) {
 			Node A = s.rt.nodes.get(i);
@@ -658,18 +645,13 @@ public class VRP {
 			Node B = s.rt.nodes.get(firstIndex);
 			Node C = s.rt.nodes.get(firstIndex + 1);
 
-			// Why do we have selected secIndex to start from firstIndex + 1?
-			// Symmetric move!!! --- No reason to swap pair B and E and then E and B !!! ---
-			// It's the same thing!!!
+		
 			for (int secondInd = firstIndex + 1; secondInd < s.rt.nodes.size() - 1; secondInd++) {
 				Node D = s.rt.nodes.get(secondInd - 1);
 				Node E = s.rt.nodes.get(secondInd);
 				Node F = s.rt.nodes.get(secondInd + 1);
 
-				// Based on the mechanics of the move two cases may arise
-				// 1. the swapped are consecutive nodes (secondInd == firstIndex + 1), in other
-				// words B == D and C == E
-				// 2. the swapped are non-consecutive nodes (secondInd > firstIndex + 1)
+				
 
 				double costRemoved = 0;
 				double costAdded = 0;
