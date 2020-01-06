@@ -459,7 +459,12 @@ public class VRP {
 			
 		}
 	
-	
+		for (int i = 0; i < s.allRoutes.size(); i++) {
+	   		if (i < 15)
+	   			s.allRoutes.add(s.routes1500.get(i));
+	   		if (i > 15)
+	   			s.allRoutes.add(s.routes1200.get(i - 15));
+	   }
 	
 	}
 
@@ -521,6 +526,13 @@ public class VRP {
 				s.routes1200.get(k).cost += top.moveCost;
 		
 		}
+		
+		for (int i = 0; i < s.allRoutes.size(); i++) {
+	   		if (i < 15)
+	   			s.allRoutes.add(s.routes1500.get(i));
+	   		if (i > 15)
+	   			s.allRoutes.add(s.routes1200.get(i - 15));
+	   }
 		
 		s.cost += top.moveCost;
 
@@ -604,7 +616,7 @@ public class VRP {
 		   for (int i = 0; i < s.allRoutes.size(); i++) {
 		   		if (i < 15)
 		   			out.allRoutes.add(s.routes1500.get(i));
-		   		if (i < 15)
+		   		if (i > 15)
 		   			out.allRoutes.add(s.routes1200.get(i - 15));
 		   }
 
@@ -617,8 +629,8 @@ public class VRP {
 
 		
 		
-		
-		Route route = s.rt;
+	for (int m = 0; m < s.routes1500.size(); m++) {	
+		Route route = s.routes1500.get(m);
 		ArrayList<Node> nodeSequence = route.nodes;
 		// Initialization
 		nodeSequence.add(depot);
@@ -664,9 +676,73 @@ public class VRP {
 
 		nodeSequence.add(depot);
 
-		s.cost = s.cost + distanceMatrix[lastInTheRoute.ID][depot.ID];
+		s.routes1500.get(m).cost = s.routes1500.get(m).cost + distanceMatrix[lastInTheRoute.ID][depot.ID];
 
 		route.cost = route.cost + distanceMatrix[lastInTheRoute.ID][depot.ID];
+		
+	}
+	
+	
+	for (int k = 0; k < s.routes1200.size(); k++) {	
+		Route route = s.routes1200.get(k);
+		ArrayList<Node> nodeSequence = route.nodes;
+		// Initialization
+		nodeSequence.add(depot);
+
+		for (int i = 0; i < customers.size(); i++) {
+			int positionOfTheNextOne = -1;
+			double bestCostForTheNextOne = Double.MAX_VALUE;
+
+			Node lastInTheRoute = nodeSequence.get(nodeSequence.size() - 1);
+
+		
+			for (int j = 0; j < customers.size(); j++) {
+				Node candidate = customers.get(j);
+
+				if (candidate.isRouted == false) {
+					double trialCost = distanceMatrix[lastInTheRoute.ID][candidate.ID];
+
+					if (trialCost < bestCostForTheNextOne) {
+						positionOfTheNextOne = j;
+						bestCostForTheNextOne = trialCost;
+					}
+				}
+			}
+
+			Node insertedNode = customers.get(positionOfTheNextOne);
+
+			nodeSequence.add(insertedNode);
+
+			double testCost = distanceMatrix[lastInTheRoute.ID][insertedNode.ID];
+
+			if (testCost != bestCostForTheNextOne) {
+				System.out.println("Something has gone wrong with the cost calculations");
+			}
+
+			s.cost = s.cost + bestCostForTheNextOne;
+
+			route.cost = route.cost + bestCostForTheNextOne;
+
+			insertedNode.isRouted = true;
+		}
+
+		Node lastInTheRoute = nodeSequence.get(nodeSequence.size() - 1);
+
+		nodeSequence.add(depot);
+
+		s.routes1200.get(k).cost = s.routes1200.get(k).cost + distanceMatrix[lastInTheRoute.ID][depot.ID];
+
+		route.cost = route.cost + distanceMatrix[lastInTheRoute.ID][depot.ID];
+		
+	}
+	
+	
+	for (int i = 0; i < s.allRoutes.size(); i++) {
+		if (i < 15)
+			s.allRoutes.add(s.routes1500.get(i));
+		if (i > 15)
+			s.allRoutes.add(s.routes1200.get(i - 15));
+	}
 	
 	}
 
@@ -743,104 +819,245 @@ public class VRP {
 				}
 			}
 			
-	}
+		}
+		
+		
+		for (int i = 0; i < s.allRoutes.size(); i++) {
+	   		if (i < 15)
+	   			s.allRoutes.add(s.routes1500.get(i));
+	   		if (i > 15)
+	   			s.allRoutes.add(s.routes1200.get(i - 15));
+	   }
 	}
 
 	private void applyRelocationMove(RelocationMove rm, Solution s) {
-		Node relocatedNode = s.rt.nodes.get(rm.originNodePosition);
-
-		s.rt.nodes.remove(rm.originNodePosition);
-
+				
+		for (int i = 0; i < s.routes1500.size(); i++ ) {
+				Node relocatedNode = s.routes1500.get(i).nodes.get(rm.originNodePosition);
 		
-		if (rm.targetNodePosition < rm.originNodePosition) {
-			s.rt.nodes.add(rm.targetNodePosition + 1, relocatedNode);
+				s.routes1500.get(i).nodes.remove(rm.originNodePosition);
+		
+				
+				if (rm.targetNodePosition < rm.originNodePosition) {
+					s.routes1500.get(i).nodes.add(rm.targetNodePosition + 1, relocatedNode);
+				}
+			
+				else {
+					s.routes1500.get(i).nodes.add(rm.targetNodePosition, relocatedNode);
+				}
+		
+			
+				double newSolutionCost = 0;
+				for (int m = 0; m < s.routes1500.get(i).nodes.size() - 1; m++) {
+					Node A = s.routes1500.get(m).nodes.get(m);
+					Node B = s.routes1500.get(m).nodes.get(m + 1);
+					newSolutionCost = newSolutionCost + distanceMatrix[A.ID][B.ID];
+				}
+		
+				if (s.cost + rm.moveCost != newSolutionCost) {
+					System.out.println("Something Went wrong with the cost calculations !!!!");
+				}
+		
+				s.cost = s.cost + rm.moveCost;
+				s.routes1500.get(i).cost = s.routes1500.get(i).cost + rm.moveCost;
+				
 		}
+		
+		for (int j = 0; j < s.routes1200.size(); j++ ) {
+			Node relocatedNode = s.routes1200.get(j).nodes.get(rm.originNodePosition);
 	
-		else {
-			s.rt.nodes.add(rm.targetNodePosition, relocatedNode);
-		}
-
+			s.routes1200.get(j).nodes.remove(rm.originNodePosition);
 	
-		double newSolutionCost = 0;
-		for (int i = 0; i < s.rt.nodes.size() - 1; i++) {
-			Node A = s.rt.nodes.get(i);
-			Node B = s.rt.nodes.get(i + 1);
-			newSolutionCost = newSolutionCost + distanceMatrix[A.ID][B.ID];
-		}
-
-		if (s.cost + rm.moveCost != newSolutionCost) {
-			System.out.println("Something Went wrong with the cost calculations !!!!");
-		}
-
-		s.cost = s.cost + rm.moveCost;
-		s.rt.cost = s.rt.cost + rm.moveCost;
+			
+			if (rm.targetNodePosition < rm.originNodePosition) {
+				s.routes1200.get(j).nodes.add(rm.targetNodePosition + 1, relocatedNode);
+			}
+		
+			else {
+				s.routes1200.get(j).nodes.add(rm.targetNodePosition, relocatedNode);
+			}
+	
+		
+			double newSolutionCost = 0;
+			for (int i = 0; i < s.routes1200.get(j).nodes.size() - 1; i++) {
+				Node A = s.routes1200.get(j).nodes.get(i);
+				Node B = s.routes1200.get(j).nodes.get(i + 1);
+				newSolutionCost = newSolutionCost + distanceMatrix[A.ID][B.ID];
+			}
+	
+			if (s.cost + rm.moveCost != newSolutionCost) {
+				System.out.println("Something Went wrong with the cost calculations !!!!");
+			}
+	
+			s.cost = s.cost + rm.moveCost;
+			s.routes1200.get(j).cost = s.routes1200.get(j).cost + rm.moveCost;
+			
+			}
+		
+			for (int i = 0; i < s.allRoutes.size(); i++) {
+				if (i < 15)
+					s.allRoutes.add(s.routes1500.get(i));
+				if (i > 15)
+					s.allRoutes.add(s.routes1200.get(i - 15));
+			}	
+		
+		
 	}
 
 	private void findBestSwapMove(SwapMove sm, Solution s) {
 		double bestMoveCost = Double.MAX_VALUE;
 
-		for (int firstIndex = 1; firstIndex < s.rt.nodes.size() - 1; firstIndex++) {
-			Node A = s.rt.nodes.get(firstIndex - 1);
-			Node B = s.rt.nodes.get(firstIndex);
-			Node C = s.rt.nodes.get(firstIndex + 1);
-
-		
-			for (int secondInd = firstIndex + 1; secondInd < s.rt.nodes.size() - 1; secondInd++) {
-				Node D = s.rt.nodes.get(secondInd - 1);
-				Node E = s.rt.nodes.get(secondInd);
-				Node F = s.rt.nodes.get(secondInd + 1);
-
 				
-
-				double costRemoved = 0;
-				double costAdded = 0;
-
-				if (secondInd == firstIndex + 1) {
-					costRemoved = distanceMatrix[A.ID][B.ID] + distanceMatrix[B.ID][C.ID] + distanceMatrix[C.ID][F.ID];
-					costAdded = distanceMatrix[A.ID][C.ID] + distanceMatrix[C.ID][B.ID] + distanceMatrix[B.ID][F.ID];
-				} else {
-					double costRemoved1 = distanceMatrix[A.ID][B.ID] + distanceMatrix[B.ID][C.ID];
-					double costRemoved2 = distanceMatrix[D.ID][E.ID] + distanceMatrix[E.ID][F.ID];
-					costRemoved = costRemoved1 + costRemoved2;
-
-					double costAdded1 = distanceMatrix[A.ID][E.ID] + distanceMatrix[E.ID][C.ID];
-					double costAdded2 = distanceMatrix[D.ID][B.ID] + distanceMatrix[B.ID][F.ID];
-					costAdded = costAdded1 + costAdded2;
+		for (int i = 0; i < s.routes1500.size(); i++) {
+				for (int firstIndex = 1; firstIndex < s.routes1500.get(i).nodes.size() - 1; firstIndex++) {
+					Node A = s.routes1500.get(i).nodes.get(firstIndex - 1);
+					Node B = s.routes1500.get(i).nodes.get(firstIndex);
+					Node C = s.routes1500.get(i).nodes.get(firstIndex + 1);
+		
+				
+					for (int secondInd = firstIndex + 1; secondInd < s.routes1500.get(i).nodes.size() - 1; secondInd++) {
+						Node D = s.routes1500.get(i).nodes.get(secondInd - 1);
+						Node E = s.routes1500.get(i).nodes.get(secondInd);
+						Node F = s.routes1500.get(i).nodes.get(secondInd + 1);
+		
+						
+		
+						double costRemoved = 0;
+						double costAdded = 0;
+		
+						if (secondInd == firstIndex + 1) {
+							costRemoved = distanceMatrix[A.ID][B.ID] + distanceMatrix[B.ID][C.ID] + distanceMatrix[C.ID][F.ID];
+							costAdded = distanceMatrix[A.ID][C.ID] + distanceMatrix[C.ID][B.ID] + distanceMatrix[B.ID][F.ID];
+						} else {
+							double costRemoved1 = distanceMatrix[A.ID][B.ID] + distanceMatrix[B.ID][C.ID];
+							double costRemoved2 = distanceMatrix[D.ID][E.ID] + distanceMatrix[E.ID][F.ID];
+							costRemoved = costRemoved1 + costRemoved2;
+		
+							double costAdded1 = distanceMatrix[A.ID][E.ID] + distanceMatrix[E.ID][C.ID];
+							double costAdded2 = distanceMatrix[D.ID][B.ID] + distanceMatrix[B.ID][F.ID];
+							costAdded = costAdded1 + costAdded2;
+						}
+		
+						double moveCost = costAdded - costRemoved;
+		
+						if (moveCost < bestMoveCost) {
+							bestMoveCost = moveCost;
+		
+							sm.firstNodePosition = firstIndex;
+							sm.secondNodePosition = secondInd;
+							sm.moveCost = moveCost;
+						}
+					}
 				}
-
-				double moveCost = costAdded - costRemoved;
-
-				if (moveCost < bestMoveCost) {
-					bestMoveCost = moveCost;
-
-					sm.firstNodePosition = firstIndex;
-					sm.secondNodePosition = secondInd;
-					sm.moveCost = moveCost;
+		}
+		
+		for (int i = 0; i < s.routes1200.size(); i++) {
+			for (int firstIndex = 1; firstIndex < s.routes1200.get(i).nodes.size() - 1; firstIndex++) {
+				Node A = s.routes1200.get(i).nodes.get(firstIndex - 1);
+				Node B = s.routes1200.get(i).nodes.get(firstIndex);
+				Node C = s.routes1200.get(i).nodes.get(firstIndex + 1);
+	
+			
+				for (int secondInd = firstIndex + 1; secondInd < s.routes1200.get(i).nodes.size() - 1; secondInd++) {
+					Node D = s.routes1200.get(i).nodes.get(secondInd - 1);
+					Node E = s.routes1200.get(i).nodes.get(secondInd);
+					Node F = s.routes1200.get(i).nodes.get(secondInd + 1);
+	
+					
+	
+					double costRemoved = 0;
+					double costAdded = 0;
+	
+					if (secondInd == firstIndex + 1) {
+						costRemoved = distanceMatrix[A.ID][B.ID] + distanceMatrix[B.ID][C.ID] + distanceMatrix[C.ID][F.ID];
+						costAdded = distanceMatrix[A.ID][C.ID] + distanceMatrix[C.ID][B.ID] + distanceMatrix[B.ID][F.ID];
+					} else {
+						double costRemoved1 = distanceMatrix[A.ID][B.ID] + distanceMatrix[B.ID][C.ID];
+						double costRemoved2 = distanceMatrix[D.ID][E.ID] + distanceMatrix[E.ID][F.ID];
+						costRemoved = costRemoved1 + costRemoved2;
+	
+						double costAdded1 = distanceMatrix[A.ID][E.ID] + distanceMatrix[E.ID][C.ID];
+						double costAdded2 = distanceMatrix[D.ID][B.ID] + distanceMatrix[B.ID][F.ID];
+						costAdded = costAdded1 + costAdded2;
+					}
+	
+					double moveCost = costAdded - costRemoved;
+	
+					if (moveCost < bestMoveCost) {
+						bestMoveCost = moveCost;
+	
+						sm.firstNodePosition = firstIndex;
+						sm.secondNodePosition = secondInd;
+						sm.moveCost = moveCost;
+					}
 				}
 			}
 		}
+		for (int i = 0; i < s.allRoutes.size(); i++) {
+			if (i < 15)
+				s.allRoutes.add(s.routes1500.get(i));
+			if (i > 15)
+				s.allRoutes.add(s.routes1200.get(i - 15));
+		}	
 	}
 
 	private void applySwapMove(SwapMove sm, Solution s) {
-		Node swapped1 = s.rt.nodes.get(sm.firstNodePosition);
-		Node swapped2 = s.rt.nodes.get(sm.secondNodePosition);
-
-		s.rt.nodes.set(sm.firstNodePosition, swapped2);
-		s.rt.nodes.set(sm.secondNodePosition, swapped1);
-
-		double newSolutionCost = 0;
-		for (int i = 0; i < s.rt.nodes.size() - 1; i++) {
-			Node A = s.rt.nodes.get(i);
-			Node B = s.rt.nodes.get(i + 1);
-			newSolutionCost = newSolutionCost + distanceMatrix[A.ID][B.ID];
+				
+		
+		for (int i = 0; i < s.routes1500.size(); i++) {
+				Node swapped1 = s.routes1500.get(i).nodes.get(sm.firstNodePosition);
+				Node swapped2 = s.routes1500.get(i).nodes.get(sm.secondNodePosition);
+		
+				s.routes1500.get(i).nodes.set(sm.firstNodePosition, swapped2);
+				s.routes1500.get(i).nodes.set(sm.secondNodePosition, swapped1);
+		
+				double newSolutionCost = 0;
+				for (int m = 0; m < s.routes1500.get(i).nodes.size() - 1; m++) {
+					Node A = s.routes1500.get(i).nodes.get(m);
+					Node B = s.routes1500.get(i).nodes.get(m + 1);
+					newSolutionCost = newSolutionCost + distanceMatrix[A.ID][B.ID];
+				}
+		
+				if (s.cost + sm.moveCost != newSolutionCost) {
+					System.out.println("Something Went wrong with the cost calculations !!!!");
+				}
+		
+				s.cost = s.cost + sm.moveCost;
+				s.routes1500.get(i).cost = s.routes1500.get(i).cost + sm.moveCost;
 		}
-
-		if (s.cost + sm.moveCost != newSolutionCost) {
-			System.out.println("Something Went wrong with the cost calculations !!!!");
-		}
-
-		s.cost = s.cost + sm.moveCost;
-		s.rt.cost = s.rt.cost + sm.moveCost;
+		
+		
+		for (int j = 0; j < s.routes1200.size(); j++) {
+			Node swapped1 = s.routes1200.get(j).nodes.get(sm.firstNodePosition);
+			Node swapped2 = s.routes1200.get(j).nodes.get(sm.secondNodePosition);
+	
+			s.routes1200.get(j).nodes.set(sm.firstNodePosition, swapped2);
+			s.routes1200.get(j).nodes.set(sm.secondNodePosition, swapped1);
+	
+			double newSolutionCost = 0;
+			for (int i = 0; i < s.routes1200.get(j).nodes.size() - 1; i++) {
+				Node A = s.routes1200.get(j).nodes.get(i);
+				Node B = s.routes1200.get(j).nodes.get(i + 1);
+				newSolutionCost = newSolutionCost + distanceMatrix[A.ID][B.ID];
+			}
+	
+			if (s.cost + sm.moveCost != newSolutionCost) {
+				System.out.println("Something Went wrong with the cost calculations !!!!");
+			}
+	
+			s.cost = s.cost + sm.moveCost;
+			s.routes1200.get(j).cost = s.routes1200.get(j).cost + sm.moveCost;
+	}
+		
+		
+		for (int i = 0; i < s.allRoutes.size(); i++) {
+			if (i < 15)
+				s.allRoutes.add(s.routes1500.get(i));
+			if (i > 15)
+				s.allRoutes.add(s.routes1200.get(i - 15));
+		}		
+		
+		
 	}
 	/*
 	 *
